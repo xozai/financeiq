@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { exchangePublicToken, getAccounts, getInvestments, getLiabilities } from '@/lib/plaid'
+import { exchangePublicToken, getAccounts } from '@/lib/plaid'
 import { z } from 'zod'
 
 const Body = z.object({ public_token: z.string(), institution_name: z.string().optional() })
@@ -43,6 +43,11 @@ export async function POST(req: Request) {
     })),
     { onConflict: 'plaid_account_id' }
   )
+
+  // Kick off full sync in the background (non-blocking)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3010'
+  fetch(`${baseUrl}/api/plaid/sync`, { method: 'POST', headers: { cookie: req.headers.get('cookie') ?? '' } })
+    .catch(() => {}) // best-effort
 
   return NextResponse.json({ success: true })
 }

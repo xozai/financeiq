@@ -8,16 +8,18 @@ import {
   Receipt,
   Newspaper,
   Lightbulb,
+  Building2,
   Settings,
 } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard',               label: 'Overview',         icon: LayoutDashboard },
-  { href: '/dashboard/portfolio',     label: 'Portfolio',        icon: TrendingUp },
-  { href: '/dashboard/debt',          label: 'Debt',             icon: CreditCard },
-  { href: '/dashboard/taxes',         label: 'Tax Optimizer',    icon: Receipt },
-  { href: '/dashboard/news',          label: 'Market News',      icon: Newspaper },
-  { href: '/dashboard/recommendations', label: 'AI Advisor',    icon: Lightbulb },
+  { href: '/dashboard',                  label: 'Overview',      icon: LayoutDashboard },
+  { href: '/dashboard/portfolio',        label: 'Portfolio',     icon: TrendingUp },
+  { href: '/dashboard/debt',             label: 'Debt',          icon: CreditCard },
+  { href: '/dashboard/taxes',            label: 'Tax Optimizer', icon: Receipt },
+  { href: '/dashboard/news',             label: 'Market News',   icon: Newspaper },
+  { href: '/dashboard/recommendations',  label: 'AI Advisor',    icon: Lightbulb },
+  { href: '/dashboard/accounts',         label: 'Accounts',      icon: Building2 },
 ]
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
