@@ -5,36 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import type { Debt } from '@/lib/types'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
+import { buildPayoffSchedule } from '@/lib/payoff'
 type Method = 'avalanche' | 'snowball'
-
-function buildPayoffSchedule(debts: Debt[], extraMonthly: number, method: Method) {
-  let remaining = debts.map(d => ({ ...d, balance: d.balance }))
-  const sortedDebts = method === 'avalanche'
-    ? [...remaining].sort((a, b) => b.apr - a.apr)
-    : [...remaining].sort((a, b) => a.balance - b.balance)
-
-  const monthlySnapshots: { month: number; totalDebt: number }[] = []
-  let month = 0
-  let total = remaining.reduce((s, d) => s + d.balance, 0)
-
-  while (total > 0 && month < 600) {
-    month++
-    let extra = extraMonthly
-
-    for (const debt of sortedDebts) {
-      const d = remaining.find(r => r.id === debt.id)!
-      if (d.balance <= 0) continue
-      const interest = (d.balance * (d.apr / 100)) / 12
-      const payment = Math.min(d.balance + interest, d.minimum_payment + (extra > 0 ? extra : 0))
-      extra = Math.max(0, extra - Math.max(0, payment - d.minimum_payment))
-      d.balance = Math.max(0, d.balance + interest - payment)
-    }
-    total = remaining.reduce((s, d) => s + d.balance, 0)
-    if (month % 3 === 0 || total <= 0) monthlySnapshots.push({ month, totalDebt: Math.max(0, total) })
-  }
-
-  return { months: month, snapshots: monthlySnapshots }
-}
 
 export default function DebtPage() {
   const supabase = createClient()

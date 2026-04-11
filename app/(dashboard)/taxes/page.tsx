@@ -1,25 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 
-// 2025 limits
-const LIMITS = {
-  k401: 23500,
-  ira: 7000,
-  hsa: 4300,
-}
+import { getMarginalRate, BRACKETS, CONTRIBUTION_LIMITS, estimateTaxSavings } from '@/lib/tax'
 
-const BRACKETS_SINGLE = [
-  { min: 0,       max: 11925,  rate: 10 },
-  { min: 11925,   max: 48475,  rate: 12 },
-  { min: 48475,   max: 103350, rate: 22 },
-  { min: 103350,  max: 197300, rate: 24 },
-  { min: 197300,  max: 250525, rate: 32 },
-  { min: 250525,  max: 626350, rate: 35 },
-  { min: 626350,  max: Infinity, rate: 37 },
-]
-
-function getMarginalRate(income: number) {
-  return BRACKETS_SINGLE.find(b => income >= b.min && income < b.max)?.rate ?? 37
-}
+const LIMITS = CONTRIBUTION_LIMITS
 
 function ContributionBar({ label, used, limit, limit2025 }: { label: string; used: number; limit: number; limit2025: string }) {
   const pct = Math.min((used / limit) * 100, 100)
@@ -83,8 +66,8 @@ export default async function TaxesPage() {
   // Placeholder YTD contributions (replace with actual data from linked accounts)
   const ytdContributions = { k401: 0, ira: 0, hsa: 0 }
 
-  const bracketSavings401k = Math.round(LIMITS.k401 * (marginalRate / 100))
-  const bracketSavingsIra = Math.round(LIMITS.ira * (marginalRate / 100))
+  const bracketSavings401k = estimateTaxSavings(LIMITS.k401, marginalRate)
+  const bracketSavingsIra = estimateTaxSavings(LIMITS.ira, marginalRate)
 
   return (
     <div className="space-y-6">
@@ -132,7 +115,7 @@ export default async function TaxesPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-5">
         <h3 className="text-sm font-semibold text-gray-900 mb-4">2025 Federal Tax Brackets (Single)</h3>
         <div className="space-y-2">
-          {BRACKETS_SINGLE.filter(b => b.min < 700000).map(b => {
+          {BRACKETS.single.filter(b => b.min < 700000).map(b => {
             const income = profile?.annual_income_estimate ?? estimatedIncome
             const isActive = income >= b.min && income < b.max
             return (

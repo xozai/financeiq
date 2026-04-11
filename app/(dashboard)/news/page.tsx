@@ -3,39 +3,12 @@
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import type { RawNewsItem } from '@/lib/market'
+import { tagSentiment, tagImpacts } from '@/lib/sentiment'
 
 const SENTIMENT_COLORS = {
   bullish: 'bg-green-100 text-green-700',
   bearish: 'bg-red-100 text-red-700',
   neutral: 'bg-gray-100 text-gray-600',
-}
-
-// Simple heuristic sentiment tagger (client-side; replace with Claude API call for production)
-function tagSentiment(headline: string): keyof typeof SENTIMENT_COLORS {
-  const lower = headline.toLowerCase()
-  const bullishWords = ['surge', 'rally', 'gain', 'rise', 'beat', 'record', 'growth', 'strong', 'up', 'profit', 'boost']
-  const bearishWords = ['fall', 'drop', 'decline', 'crash', 'loss', 'miss', 'recession', 'inflation', 'slump', 'cut', 'down']
-  const bullScore = bullishWords.filter(w => lower.includes(w)).length
-  const bearScore = bearishWords.filter(w => lower.includes(w)).length
-  if (bullScore > bearScore) return 'bullish'
-  if (bearScore > bullScore) return 'bearish'
-  return 'neutral'
-}
-
-const IMPACT_KEYWORDS: Record<string, string> = {
-  'fed|federal reserve|fomc|rate': 'Fed Policy',
-  'inflation|cpi|pce': 'Inflation',
-  'earnings|revenue|profit': 'Earnings',
-  'geopolit|war|sanction|tariff': 'Geopolitical',
-  'treasury|bond|yield': 'Rates',
-  'gdp|recession|growth': 'GDP/Growth',
-}
-
-function tagImpacts(text: string): string[] {
-  const lower = text.toLowerCase()
-  return Object.entries(IMPACT_KEYWORDS)
-    .filter(([pattern]) => new RegExp(pattern).test(lower))
-    .map(([, label]) => label)
 }
 
 export default function NewsPage() {
